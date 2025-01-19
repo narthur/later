@@ -17,5 +17,8 @@ export function saveTasks(tasks: Task[]) {
 }
 
 export function getDateString(date: Date): string {
-  return date.toISOString().split('T')[0];
+  // Use local timezone for date string
+  return new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+    .toISOString()
+    .split('T')[0];
 }
