@@ -19,13 +19,13 @@
   
   // Convert reactive logging to $effect
   $effect(() => {
-    const left = getDateForOffset(-1);
-    const right = getDateForOffset(0);
+    const left = getDateForOffset(-2);
+    const right = getDateForOffset(-1);
     console.log('Page dates updated:', { left, right, currentDate: currentDate.toISOString() });
   });
   
-  const leftPageDate = $derived(getDateForOffset(-1));
-  const rightPageDate = $derived(getDateForOffset(0));
+  const leftPageDate = $derived(getDateForOffset(-2));
+  const rightPageDate = $derived(getDateForOffset(-1));
   const leftPageTasks = $derived(tasks.filter(t => t.date === leftPageDate));
   const rightPageTasks = $derived(tasks.filter(t => t.date === rightPageDate));
   
@@ -65,9 +65,9 @@
   }
 
   function turnPage(direction: 'forward' | 'backward') {
-    // Create a new Date object to ensure reactivity
+    // Move two days at a time
     const newDate = new Date(currentDate.getTime());
-    newDate.setDate(newDate.getDate() + (direction === 'forward' ? 1 : -1));
+    newDate.setDate(newDate.getDate() + (direction === 'forward' ? 2 : -2));
     currentDate = newDate;
     console.log('Turned page:', direction, 'new date:', currentDate.toISOString());
   }
@@ -80,13 +80,13 @@
         onclick={() => turnPage('backward')}
         class="px-4 py-2 bg-amber-200 rounded hover:bg-amber-300 transition-colors"
       >
-        ← Previous Days
+        ← Previous Spread
       </button>
       <button
         onclick={() => turnPage('forward')}
         class="px-4 py-2 bg-amber-200 rounded hover:bg-amber-300 transition-colors"
       >
-        Next Days →
+        Next Spread →
       </button>
     </div>
     
