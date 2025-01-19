@@ -7,3 +7,13 @@ export interface Task {
 }
 
 export type TaskDay = 'yesterday' | 'today' | 'tomorrow' | string;
+
+export interface Spread {
+  leftDate: string;
+  rightDate: string;
+}
+
+export interface SpreadTasks {
+  leftTasks: Task[];
+  rightTasks: Task[];
+}
