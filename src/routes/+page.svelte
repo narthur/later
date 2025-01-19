@@ -28,8 +28,8 @@
   
   const leftPageDate = $derived(getDateForOffset(-2));  // Show yesterday
   const rightPageDate = $derived(getDateForOffset(-1)); // Show today
-  const leftPageTasks = $derived(tasks.filter(t => t.date === leftPageDate));
-  const rightPageTasks = $derived(tasks.filter(t => t.date === rightPageDate));
+  const leftPageTasks = $derived(tasks.filter(t => t.date === leftPageDate && !t.deleted));
+  const rightPageTasks = $derived(tasks.filter(t => t.date === rightPageDate && !t.deleted));
   
   function handleTaskUpdate(task: Task) {
     const index = tasks.findIndex(t => t.id === task.id);

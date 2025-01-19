@@ -4,6 +4,7 @@ export interface Task {
   completed: boolean;
   date: string; // ISO date string YYYY-MM-DD
   createdAt: number; // timestamp
+  deleted?: boolean;
 }
 
 export type TaskDay = 'yesterday' | 'today' | 'tomorrow' | string;

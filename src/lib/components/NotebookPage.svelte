@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Task } from '../types';
   import type { TaskDay } from '../types';
+  import Icon from '@iconify/svelte';
   
   let { tasks, date, onTaskUpdate, onTaskMove, canAdd = false } = $props();
   
@@ -51,11 +52,20 @@
     editingText = '';
   }
 
+  function deleteTask(task: Task) {
+    if (confirm('Are you sure you want to delete this task?')) {
+      onTaskUpdate({
+        ...task,
+        deleted: true
+      });
+    }
+  }
+
   function calculateRelativeDay(dateStr: string): TaskDay {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const pageDate = new Date(dateStr + 'T00:00:00'); // Add explicit time part
+    const pageDate = new Date(dateStr + 'T00:00:00');
     pageDate.setHours(0, 0, 0, 0);
     
     const diffDays = Math.round((pageDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -71,17 +81,14 @@
     return `in ${diffDays} days`;
   }
 
-  // Format date to be more readable
   const formattedDate = $derived(new Date(date).toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric'
   }));
 
-  // Make the relative day calculation explicitly dependent on the date prop
   const relativeDay = $derived(calculateRelativeDay(date));
 
-  // Use $effect for side effects
   $effect(() => {
     console.log('NotebookPage updated:', { date, relativeDay, formattedDate });
   });
@@ -95,7 +102,7 @@
   
   <ul class="space-y-2 flex-grow">
     {#each tasks as task (task.id)}
-      <li class="flex items-center gap-2">
+      <li class="flex items-center gap-2 group">
         <input
           type="checkbox"
           checked={task.completed}
@@ -116,56 +123,77 @@
             <button
               onclick={() => saveEdit(task)}
               class="text-sm text-green-600 hover:underline"
+              title="Save"
             >
-              Save
+              <Icon icon="mdi:check" width="20" />
             </button>
             <button
               onclick={cancelEdit}
               class="text-sm text-red-600 hover:underline"
+              title="Cancel"
             >
-              Cancel
+              <Icon icon="mdi:close" width="20" />
             </button>
           </div>
         {:else}
           <span class:line-through={task.completed} class="flex-grow">
             {task.text}
           </span>
-          <button
-            onclick={() => startEditing(task)}
-            class="text-sm text-gray-600 hover:underline"
-          >
-            Edit
-          </button>
-          {#if relativeDay === 'yesterday' || relativeDay.endsWith('days ago')}
+          <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onclick={() => onTaskMove(task.id, 'today')}
-              class="text-sm text-blue-600 hover:underline"
+              onclick={() => startEditing(task)}
+              class="text-gray-600 hover:text-gray-800"
+              title="Edit"
             >
-              Move to Today
+              <Icon icon="mdi:pencil" width="20" />
             </button>
-          {/if}
-          {#if relativeDay === 'today'}
             <button
-              onclick={() => onTaskMove(task.id, 'tomorrow')}
-              class="text-sm text-blue-600 hover:underline"
+              onclick={() => deleteTask(task)}
+              class="text-red-600 hover:text-red-800"
+              title="Delete"
             >
-              Delay
+              <Icon icon="mdi:delete" width="20" />
             </button>
-          {/if}
+            {#if relativeDay === 'yesterday' || relativeDay.endsWith('days ago')}
+              <button
+                onclick={() => onTaskMove(task.id, 'today')}
+                class="text-blue-600 hover:text-blue-800"
+                title="Move to Today"
+              >
+                <Icon icon="mdi:arrow-right" width="20" />
+              </button>
+            {/if}
+            {#if relativeDay === 'today'}
+              <button
+                onclick={() => onTaskMove(task.id, 'tomorrow')}
+                class="text-blue-600 hover:text-blue-800"
+                title="Delay"
+              >
+                <Icon icon="mdi:clock" width="20" />
+              </button>
+            {/if}
+          </div>
         {/if}
       </li>
     {/each}
   </ul>
   
   {#if canAdd}
-    <div class="mt-4">
+    <div class="mt-4 flex gap-2">
       <input
         type="text"
         bind:value={newTaskText}
         placeholder="Add new task..."
-        class="w-full p-2 border rounded"
+        class="flex-grow p-2 border rounded"
         onkeydown={(e) => e.key === 'Enter' && handleNewTask()}
       />
+      <button
+        onclick={handleNewTask}
+        class="px-2 text-green-600 hover:text-green-800"
+        title="Add Task"
+      >
+        <Icon icon="mdi:plus" width="24" />
+      </button>
     </div>
   {/if}
 </div>
