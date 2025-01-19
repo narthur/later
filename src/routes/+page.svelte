@@ -71,17 +71,31 @@
     currentDate = newDate;
     console.log('Turned page:', direction, 'new date:', currentDate.toISOString());
   }
+
+  function jumpToToday() {
+    // Reset to today's date
+    currentDate = new Date();
+    console.log('Jumped to today:', currentDate.toISOString());
+  }
 </script>
 
 <div class="min-h-screen bg-amber-100 p-8">
   <div class="max-w-4xl mx-auto">
     <div class="flex justify-between mb-4">
-      <button
-        onclick={() => turnPage('backward')}
-        class="px-4 py-2 bg-amber-200 rounded hover:bg-amber-300 transition-colors"
-      >
-        ← Previous Spread
-      </button>
+      <div class="flex gap-2">
+        <button
+          onclick={() => turnPage('backward')}
+          class="px-4 py-2 bg-amber-200 rounded hover:bg-amber-300 transition-colors"
+        >
+          ← Previous Spread
+        </button>
+        <button
+          onclick={jumpToToday}
+          class="px-4 py-2 bg-amber-300 rounded hover:bg-amber-400 transition-colors font-medium"
+        >
+          Today
+        </button>
+      </div>
       <button
         onclick={() => turnPage('forward')}
         class="px-4 py-2 bg-amber-200 rounded hover:bg-amber-300 transition-colors"
