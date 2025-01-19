@@ -3,38 +3,20 @@
   import NotebookPage from '$lib/components/NotebookPage.svelte';
   import { loadTasks, saveTasks } from '$lib/storage';
   import { DateService } from '$lib/services/dates';
-  import type { Task, TaskDay } from '$lib/types';
+  import { SpreadService } from '$lib/services/spreads';
+  import type { Task, TaskDay, Spread, SpreadTasks } from '$lib/types';
   
   let tasks = $state<Task[]>([]);
-  let currentDate = $state(DateService.getTomorrow()); // Initialize to show yesterday/today
+  let currentSpread = $state<Spread>(SpreadService.getTodaySpread());
   
   onMount(() => {
     tasks = loadTasks();
   });
   
-  function getDateForOffset(offset: number): string {
-    return DateService.getRelativeDate(currentDate, offset);
-  }
-  
-  // Add reactive logging for dates
-  $effect(() => {
-    const left = getDateForOffset(-2);
-    const right = getDateForOffset(-1);
-    console.log('Task filtering:', {
-      leftDate: left,
-      rightDate: right,
-      currentDate,
-      actualToday: DateService.getToday(),
-      allTasks: tasks.map(t => ({ id: t.id, date: t.date })),
-      leftTasks: tasks.filter(t => t.date === left).map(t => ({ id: t.id, date: t.date })),
-      rightTasks: tasks.filter(t => t.date === right).map(t => ({ id: t.id, date: t.date }))
-    });
-  });
-  
-  const leftPageDate = $derived(getDateForOffset(-2));  // Show yesterday
-  const rightPageDate = $derived(getDateForOffset(-1)); // Show today
-  const leftPageTasks = $derived(tasks.filter(t => t.date === leftPageDate && !t.deleted));
-  const rightPageTasks = $derived(tasks.filter(t => t.date === rightPageDate && !t.deleted));
+  // Calculate tasks for current spread
+  const spreadTasks = $derived<SpreadTasks>(
+    SpreadService.getTasksForSpread(currentSpread, tasks)
+  );
   
   function handleTaskUpdate(task: Task) {
     const index = tasks.findIndex(t => t.id === task.id);
@@ -54,8 +36,8 @@
     let targetDate: string;
     if (targetDay === 'today') {
       targetDate = DateService.getToday();
-      // After moving to today, update currentDate to show the correct spread
-      currentDate = DateService.getTomorrow();
+      // After moving to today, update spread to show yesterday/today
+      currentSpread = SpreadService.getTodaySpread();
     } else if (targetDay === 'tomorrow') {
       targetDate = DateService.getTomorrow();
     } else if (targetDay === 'yesterday') {
@@ -64,23 +46,32 @@
       return;
     }
     
-    const updatedTask: Task = {
+    handleTaskUpdate({
       ...task,
       date: targetDate
-    };
-    
-    handleTaskUpdate(updatedTask);
+    });
   }
 
   function turnPage(direction: 'forward' | 'backward') {
-    // Move two days at a time
-    currentDate = DateService.getRelativeDate(currentDate, direction === 'forward' ? 2 : -2);
+    currentSpread = direction === 'forward' 
+      ? SpreadService.getNextSpread(currentSpread)
+      : SpreadService.getPreviousSpread(currentSpread);
+    
+    SpreadService.validateSpread(currentSpread);
   }
 
   function jumpToToday() {
-    // Set currentDate to tomorrow to show yesterday/today spread
-    currentDate = DateService.getTomorrow();
+    currentSpread = SpreadService.getTodaySpread();
   }
+
+  // Debug logging
+  $effect(() => {
+    console.log('Current state:', {
+      spread: currentSpread,
+      actualToday: DateService.getToday(),
+      allTasks: tasks.map(t => ({ id: t.id, date: t.date, text: t.text }))
+    });
+  });
 </script>
 
 <div class="min-h-screen bg-amber-100 p-8">
@@ -111,10 +102,10 @@
     <div class="bg-white shadow-lg rounded-lg overflow-hidden">
       <div class="flex border-b">
         <div class="w-1/2 border-r">
-          {#key leftPageDate}
+          {#key currentSpread.leftDate}
           <NotebookPage
-            tasks={leftPageTasks}
-            date={leftPageDate}
+            tasks={spreadTasks.leftTasks}
+            date={currentSpread.leftDate}
             onTaskUpdate={handleTaskUpdate}
             onTaskMove={handleTaskMove}
             canAdd={true}
@@ -122,10 +113,10 @@
           {/key}
         </div>
         <div class="w-1/2">
-          {#key rightPageDate}
+          {#key currentSpread.rightDate}
           <NotebookPage
-            tasks={rightPageTasks}
-            date={rightPageDate}
+            tasks={spreadTasks.rightTasks}
+            date={currentSpread.rightDate}
             onTaskUpdate={handleTaskUpdate}
             onTaskMove={handleTaskMove}
             canAdd={true}

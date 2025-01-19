@@ -4,9 +4,15 @@ export class DateService {
   // Add getDateString as a static method
   static getDateString(date: Date): string {
     // Use local timezone for date string
-    return new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+    const result = new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
       .toISOString()
       .split('T')[0];
+    console.log('DateService.getDateString:', { 
+      input: date.toISOString(),
+      offset: date.getTimezoneOffset(),
+      result 
+    });
+    return result;
   }
 
   // Get today's date string in local timezone
@@ -34,7 +40,13 @@ export class DateService {
     const date = typeof referenceDate === 'string' ? new Date(referenceDate + 'T00:00:00') : new Date(referenceDate);
     date.setHours(0, 0, 0, 0);
     date.setDate(date.getDate() + offsetDays);
-    return this.getDateString(date);
+    const result = this.getDateString(date);
+    console.log('DateService.getRelativeDate:', { 
+      referenceDate: typeof referenceDate === 'string' ? referenceDate : referenceDate.toISOString(),
+      offsetDays,
+      result 
+    });
+    return result;
   }
 
   // Compare two dates and return the difference in days
