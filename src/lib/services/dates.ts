@@ -30,9 +30,9 @@ export class DateService {
   }
 
   // Get a relative date string from a reference date
-  static getRelativeDate(referenceDate: string, offsetDays: number): string {
-    const date = new Date(referenceDate + 'T00:00:00'); // Ensure consistent timezone handling
-    date.setHours(0, 0, 0, 0); // Reset time part
+  static getRelativeDate(referenceDate: string | Date, offsetDays: number): string {
+    const date = typeof referenceDate === 'string' ? new Date(referenceDate + 'T00:00:00') : new Date(referenceDate);
+    date.setHours(0, 0, 0, 0);
     date.setDate(date.getDate() + offsetDays);
     return this.getDateString(date);
   }

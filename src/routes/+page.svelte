@@ -1,29 +1,34 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import NotebookPage from '$lib/components/NotebookPage.svelte';
-  import { loadTasks, saveTasks, getDateString } from '$lib/storage';
+  import { loadTasks, saveTasks } from '$lib/storage';
+  import { DateService } from '$lib/services/dates';
   import type { Task, TaskDay } from '$lib/types';
   
   let tasks = $state<Task[]>([]);
-  let currentDate = $state(new Date());
+  let currentDate = $state(DateService.getTomorrow()); // Initialize to show yesterday/today
   
   onMount(() => {
     tasks = loadTasks();
   });
   
   function getDateForOffset(offset: number): string {
-    const date = new Date(currentDate);
-    date.setDate(date.getDate() + offset);
-    const result = getDateString(date);
-    console.log(`getDateForOffset(${offset}) = ${result} (currentDate: ${currentDate.toISOString()})`);
-    return result;
+    return DateService.getRelativeDate(currentDate, offset);
   }
   
-  // Convert reactive logging to $effect
+  // Add reactive logging for dates
   $effect(() => {
     const left = getDateForOffset(-2);
     const right = getDateForOffset(-1);
-    console.log('Page dates updated:', { left, right, currentDate: currentDate.toISOString() });
+    console.log('Task filtering:', {
+      leftDate: left,
+      rightDate: right,
+      currentDate,
+      actualToday: DateService.getToday(),
+      allTasks: tasks.map(t => ({ id: t.id, date: t.date })),
+      leftTasks: tasks.filter(t => t.date === left).map(t => ({ id: t.id, date: t.date })),
+      rightTasks: tasks.filter(t => t.date === right).map(t => ({ id: t.id, date: t.date }))
+    });
   });
   
   const leftPageDate = $derived(getDateForOffset(-2));  // Show yesterday
@@ -46,33 +51,15 @@
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
     let targetDate: string;
     if (targetDay === 'today') {
-      // Move to actual today
-      targetDate = getDateString(today);
+      targetDate = DateService.getToday();
       // After moving to today, update currentDate to show the correct spread
-      const newCurrentDate = new Date(today);
-      newCurrentDate.setDate(newCurrentDate.getDate() + 2); // Add two days to make today show up on the right page
-      currentDate = newCurrentDate;
-      console.log('Moving task to today:', {
-        task: task.text,
-        fromDate: task.date,
-        targetDate,
-        currentDate: currentDate.toISOString(),
-        leftPage: getDateForOffset(-2),
-        rightPage: getDateForOffset(-1)
-      });
+      currentDate = DateService.getTomorrow();
     } else if (targetDay === 'tomorrow') {
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      targetDate = getDateString(tomorrow);
+      targetDate = DateService.getTomorrow();
     } else if (targetDay === 'yesterday') {
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      targetDate = getDateString(yesterday);
+      targetDate = DateService.getYesterday();
     } else {
       return;
     }
@@ -87,21 +74,12 @@
 
   function turnPage(direction: 'forward' | 'backward') {
     // Move two days at a time
-    const newDate = new Date(currentDate.getTime());
-    newDate.setDate(newDate.getDate() + (direction === 'forward' ? 2 : -2));
-    currentDate = newDate;
-    console.log('Turned page:', direction, 'new date:', currentDate.toISOString());
+    currentDate = DateService.getRelativeDate(currentDate, direction === 'forward' ? 2 : -2);
   }
 
   function jumpToToday() {
-    // Set to today's date plus one day, so our -2/-1 offsets show yesterday/today
-    const date = new Date();
-    date.setDate(date.getDate() + 1);
-    currentDate = date;
-    console.log('Jumped to today:', currentDate.toISOString(), {
-      leftPage: getDateForOffset(-2),  // Should be yesterday
-      rightPage: getDateForOffset(-1)   // Should be today
-    });
+    // Set currentDate to tomorrow to show yesterday/today spread
+    currentDate = DateService.getTomorrow();
   }
 </script>
 
