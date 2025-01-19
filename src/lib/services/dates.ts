@@ -31,15 +31,16 @@ export class DateService {
 
   // Get a relative date string from a reference date
   static getRelativeDate(referenceDate: string, offsetDays: number): string {
-    const date = new Date(referenceDate);
+    const date = new Date(referenceDate + 'T00:00:00'); // Ensure consistent timezone handling
+    date.setHours(0, 0, 0, 0); // Reset time part
     date.setDate(date.getDate() + offsetDays);
     return this.getDateString(date);
   }
 
   // Compare two dates and return the difference in days
   static getDaysDifference(date1: string, date2: string): number {
-    const d1 = new Date(date1);
-    const d2 = new Date(date2);
+    const d1 = new Date(date1 + 'T00:00:00');
+    const d2 = new Date(date2 + 'T00:00:00');
     d1.setHours(0, 0, 0, 0);
     d2.setHours(0, 0, 0, 0);
     return Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));

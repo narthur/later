@@ -55,11 +55,14 @@
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const pageDate = new Date(dateStr);
+    const pageDate = new Date(dateStr + 'T00:00:00'); // Add explicit time part
     pageDate.setHours(0, 0, 0, 0);
     
     const diffDays = Math.round((pageDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    console.log('NotebookPage: Calculating relative day for date:', dateStr, 'diff:', diffDays);
+    console.log('NotebookPage: Calculating relative day for date:', dateStr, 'diff:', diffDays, {
+      todayDate: today.toISOString(),
+      pageDate: pageDate.toISOString()
+    });
     
     if (diffDays === 0) return 'today';
     if (diffDays === -1) return 'yesterday';
