@@ -4,8 +4,8 @@
   import { loadTasks, saveTasks, getDateString } from '$lib/storage';
   import type { Task, TaskDay } from '$lib/types';
   
-  let tasks: Task[] = [];
-  let currentDate = new Date();
+  let tasks = $state<Task[]>([]);
+  let currentDate = $state(new Date());
   
   onMount(() => {
     tasks = loadTasks();
@@ -17,17 +17,17 @@
     return getDateString(date);
   }
   
-  $: {
-    // Add reactive logging for dates
+  // Convert reactive logging to $effect
+  $effect(() => {
     const left = getDateForOffset(-1);
     const right = getDateForOffset(0);
     console.log('Page dates updated:', { left, right, currentDate: currentDate.toISOString() });
-  }
+  });
   
-  $: leftPageDate = getDateForOffset(-1);
-  $: rightPageDate = getDateForOffset(0);
-  $: leftPageTasks = tasks.filter(t => t.date === leftPageDate);
-  $: rightPageTasks = tasks.filter(t => t.date === rightPageDate);
+  const leftPageDate = $derived(getDateForOffset(-1));
+  const rightPageDate = $derived(getDateForOffset(0));
+  const leftPageTasks = $derived(tasks.filter(t => t.date === leftPageDate));
+  const rightPageTasks = $derived(tasks.filter(t => t.date === rightPageDate));
   
   function handleTaskUpdate(task: Task) {
     const index = tasks.findIndex(t => t.id === task.id);
@@ -56,7 +56,7 @@
       return;
     }
     
-    const updatedTask = {
+    const updatedTask: Task = {
       ...task,
       date: targetDate
     };
@@ -77,13 +77,13 @@
   <div class="max-w-4xl mx-auto">
     <div class="flex justify-between mb-4">
       <button
-        on:click={() => turnPage('backward')}
+        onclick={() => turnPage('backward')}
         class="px-4 py-2 bg-amber-200 rounded hover:bg-amber-300 transition-colors"
       >
         ← Previous Days
       </button>
       <button
-        on:click={() => turnPage('forward')}
+        onclick={() => turnPage('forward')}
         class="px-4 py-2 bg-amber-200 rounded hover:bg-amber-300 transition-colors"
       >
         Next Days →
