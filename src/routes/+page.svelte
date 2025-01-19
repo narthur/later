@@ -19,13 +19,13 @@
   
   // Convert reactive logging to $effect
   $effect(() => {
-    const left = getDateForOffset(-2);
-    const right = getDateForOffset(-1);
+    const left = getDateForOffset(-1);
+    const right = getDateForOffset(0);
     console.log('Page dates updated:', { left, right, currentDate: currentDate.toISOString() });
   });
   
-  const leftPageDate = $derived(getDateForOffset(-2));
-  const rightPageDate = $derived(getDateForOffset(-1));
+  const leftPageDate = $derived(getDateForOffset(-1));
+  const rightPageDate = $derived(getDateForOffset(0));
   const leftPageTasks = $derived(tasks.filter(t => t.date === leftPageDate));
   const rightPageTasks = $derived(tasks.filter(t => t.date === rightPageDate));
   
@@ -73,8 +73,10 @@
   }
 
   function jumpToToday() {
-    // Reset to today's date
-    currentDate = new Date();
+    // Set to today's date plus one day, so our -1/0 offsets show yesterday/today
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    currentDate = date;
     console.log('Jumped to today:', currentDate.toISOString());
   }
 </script>
