@@ -2,12 +2,15 @@
   import type { Task } from '../types';
   import type { TaskDay } from '../types';
   import Icon from '@iconify/svelte';
+  import * as chrono from 'chrono-node';
   
   let { tasks, date, onTaskUpdate, onTaskMove, canAdd = false } = $props();
   
   let newTaskText = $state('');
   let editingTaskId = $state<string | null>(null);
   let editingText = $state('');
+  let movingTaskId = $state<string | null>(null);
+  let moveToText = $state('');
   
   function handleNewTask() {
     if (!newTaskText.trim()) return;
@@ -89,6 +92,38 @@
 
   const relativeDay = $derived(calculateRelativeDay(date));
 
+  function startMoving(task: Task) {
+    movingTaskId = task.id;
+    moveToText = '';
+  }
+
+  function cancelMove() {
+    movingTaskId = null;
+    moveToText = '';
+  }
+
+  function handleMove(task: Task) {
+    if (!moveToText.trim()) return;
+    
+    const parsedDate = chrono.parseDate(moveToText);
+    if (!parsedDate) {
+      alert('Could not understand that date. Please try again.');
+      return;
+    }
+    
+    onTaskUpdate({
+      ...task,
+      date: getDateString(parsedDate)
+    });
+    
+    movingTaskId = null;
+    moveToText = '';
+  }
+
+  function getDateString(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
   $effect(() => {
     console.log('NotebookPage updated:', { date, relativeDay, formattedDate });
   });
@@ -122,14 +157,41 @@
             />
             <button
               onclick={() => saveEdit(task)}
-              class="text-sm text-green-600 hover:underline"
+              class="text-sm text-green-600 hover:text-green-800"
               title="Save"
             >
               <Icon icon="mdi:check" width="20" />
             </button>
             <button
               onclick={cancelEdit}
-              class="text-sm text-red-600 hover:underline"
+              class="text-sm text-red-600 hover:text-red-800"
+              title="Cancel"
+            >
+              <Icon icon="mdi:close" width="20" />
+            </button>
+          </div>
+        {:else if movingTaskId === task.id}
+          <div class="flex-grow flex gap-2">
+            <input
+              type="text"
+              bind:value={moveToText}
+              placeholder="Enter date (e.g., next friday, in 2 weeks)"
+              class="flex-grow p-1 border rounded"
+              onkeydown={(e) => {
+                if (e.key === 'Enter') handleMove(task);
+                if (e.key === 'Escape') cancelMove();
+              }}
+            />
+            <button
+              onclick={() => handleMove(task)}
+              class="text-sm text-green-600 hover:text-green-800"
+              title="Move"
+            >
+              <Icon icon="mdi:check" width="20" />
+            </button>
+            <button
+              onclick={cancelMove}
+              class="text-sm text-red-600 hover:text-red-800"
               title="Cancel"
             >
               <Icon icon="mdi:close" width="20" />
@@ -146,6 +208,13 @@
               title="Edit"
             >
               <Icon icon="mdi:pencil" width="20" />
+            </button>
+            <button
+              onclick={() => startMoving(task)}
+              class="text-blue-600 hover:text-blue-800"
+              title="Move to date..."
+            >
+              <Icon icon="mdi:calendar-clock" width="20" />
             </button>
             <button
               onclick={() => deleteTask(task)}

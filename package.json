@@ -41,6 +41,7 @@
 	},
 	"dependencies": {
 		"@iconify/json": "^2.2.297",
-		"@iconify/svelte": "^4.2.0"
+		"@iconify/svelte": "^4.2.0",
+		"chrono-node": "^2.7.7"
 	}
 }
