@@ -6,4 +6,4 @@ export interface Task {
   createdAt: number; // timestamp
 }
 
-export type TaskDay = 'yesterday' | 'today' | 'tomorrow';
+export type TaskDay = 'yesterday' | 'today' | 'tomorrow' | string;

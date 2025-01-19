@@ -2,14 +2,9 @@
   import type { Task } from '../types';
   import type { TaskDay } from '../types';
   
-  export let tasks: Task[];
-  export let date: string;
-  export let day: TaskDay;
-  export let onTaskUpdate: (task: Task) => void;
-  export let onTaskMove: (taskId: string, targetDay: TaskDay) => void;
-  export let canAdd = false;
+  let { tasks, date, onTaskUpdate, onTaskMove, canAdd = false } = $props();
   
-  let newTaskText = '';
+  let newTaskText = $state('');
   
   function handleNewTask() {
     if (!newTaskText.trim()) return;
@@ -32,10 +27,45 @@
       completed: !task.completed
     });
   }
+
+  function calculateRelativeDay(dateStr: string): TaskDay {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const pageDate = new Date(dateStr);
+    pageDate.setHours(0, 0, 0, 0);
+    
+    const diffDays = Math.round((pageDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    console.log('NotebookPage: Calculating relative day for date:', dateStr, 'diff:', diffDays);
+    
+    if (diffDays === 0) return 'today';
+    if (diffDays === -1) return 'yesterday';
+    if (diffDays === 1) return 'tomorrow';
+    if (diffDays < 0) return `${-diffDays} days ago`;
+    return `in ${diffDays} days`;
+  }
+
+  // Format date to be more readable
+  const formattedDate = $derived(new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric'
+  }));
+
+  // Make the relative day calculation explicitly dependent on the date prop
+  const relativeDay = $derived(calculateRelativeDay(date));
+
+  // Use $effect for side effects
+  $effect(() => {
+    console.log('NotebookPage updated:', { date, relativeDay, formattedDate });
+  });
 </script>
 
 <div class="flex flex-col h-full p-4 bg-amber-50">
-  <h2 class="text-xl font-serif capitalize mb-4">{day}</h2>
+  <div class="mb-4">
+    <h2 class="text-xl font-serif capitalize">{relativeDay}</h2>
+    <p class="text-sm text-gray-600">{formattedDate}</p>
+  </div>
   
   <ul class="space-y-2 flex-grow">
     {#each tasks as task (task.id)}
@@ -43,23 +73,23 @@
         <input
           type="checkbox"
           checked={task.completed}
-          on:change={() => toggleTask(task)}
+          onchange={() => toggleTask(task)}
           class="rounded border-gray-400"
         />
         <span class:line-through={task.completed} class="flex-grow">
           {task.text}
         </span>
-        {#if day === 'yesterday'}
+        {#if relativeDay === 'yesterday' || relativeDay.endsWith('days ago')}
           <button
-            on:click={() => onTaskMove(task.id, 'today')}
+            onclick={() => onTaskMove(task.id, 'today')}
             class="text-sm text-blue-600 hover:underline"
           >
             Move to Today
           </button>
         {/if}
-        {#if day === 'today'}
+        {#if relativeDay === 'today'}
           <button
-            on:click={() => onTaskMove(task.id, 'tomorrow')}
+            onclick={() => onTaskMove(task.id, 'tomorrow')}
             class="text-sm text-blue-600 hover:underline"
           >
             Delay
@@ -76,7 +106,7 @@
         bind:value={newTaskText}
         placeholder="Add new task..."
         class="w-full p-2 border rounded"
-        on:keydown={(e) => e.key === 'Enter' && handleNewTask()}
+        onkeydown={(e) => e.key === 'Enter' && handleNewTask()}
       />
     </div>
   {/if}

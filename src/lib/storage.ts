@@ -19,19 +19,3 @@ export function saveTasks(tasks: Task[]) {
 export function getDateString(date: Date): string {
   return date.toISOString().split('T')[0];
 }
-
-export function getYesterdayDate(): string {
-  const date = new Date();
-  date.setDate(date.getDate() - 1);
-  return getDateString(date);
-}
-
-export function getTodayDate(): string {
-  return getDateString(new Date());
-}
-
-export function getTomorrowDate(): string {
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  return getDateString(date);
-}
