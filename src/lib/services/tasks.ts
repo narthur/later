@@ -2,7 +2,10 @@ import type { Task } from '../types';
 import { saveTasks } from '../storage';
 
 export class TaskService {
-  constructor(private tasks: Task[]) {}
+  constructor(
+    private tasks: Task[],
+    private saveFunction: (tasks: Task[]) => void = saveTasks
+  ) {}
 
   getTasksForDate(date: string): Task[] {
     return this.tasks.filter(t => t.date === date);
@@ -15,7 +18,7 @@ export class TaskService {
     } else {
       this.tasks.push(task);
     }
-    saveTasks(this.tasks);
+    this.saveFunction(this.tasks);
   }
 
   moveTask(taskId: string, targetDate: string): void {

@@ -1,31 +1,39 @@
 import { getDateString } from '../storage';
 
 export class DateService {
+  // Add getDateString as a static method
+  static getDateString(date: Date): string {
+    // Use local timezone for date string
+    return new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+      .toISOString()
+      .split('T')[0];
+  }
+
   // Get today's date string in local timezone
   static getToday(): string {
     const today = new Date();
-    return getDateString(today);
+    return this.getDateString(today);
   }
 
   // Get yesterday's date string
   static getYesterday(): string {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    return getDateString(yesterday);
+    return this.getDateString(yesterday);
   }
 
   // Get tomorrow's date string
   static getTomorrow(): string {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return getDateString(tomorrow);
+    return this.getDateString(tomorrow);
   }
 
   // Get a relative date string from a reference date
   static getRelativeDate(referenceDate: string, offsetDays: number): string {
     const date = new Date(referenceDate);
     date.setDate(date.getDate() + offsetDays);
-    return getDateString(date);
+    return this.getDateString(date);
   }
 
   // Compare two dates and return the difference in days
