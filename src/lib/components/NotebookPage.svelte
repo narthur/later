@@ -5,6 +5,8 @@
   let { tasks, date, onTaskUpdate, onTaskMove, canAdd = false } = $props();
   
   let newTaskText = $state('');
+  let editingTaskId = $state<string | null>(null);
+  let editingText = $state('');
   
   function handleNewTask() {
     if (!newTaskText.trim()) return;
@@ -26,6 +28,27 @@
       ...task,
       completed: !task.completed
     });
+  }
+
+  function startEditing(task: Task) {
+    editingTaskId = task.id;
+    editingText = task.text;
+  }
+
+  function saveEdit(task: Task) {
+    if (editingText.trim() === '') return;
+    
+    onTaskUpdate({
+      ...task,
+      text: editingText.trim()
+    });
+    editingTaskId = null;
+    editingText = '';
+  }
+
+  function cancelEdit() {
+    editingTaskId = null;
+    editingText = '';
   }
 
   function calculateRelativeDay(dateStr: string): TaskDay {
@@ -76,24 +99,56 @@
           onchange={() => toggleTask(task)}
           class="rounded border-gray-400"
         />
-        <span class:line-through={task.completed} class="flex-grow">
-          {task.text}
-        </span>
-        {#if relativeDay === 'yesterday' || relativeDay.endsWith('days ago')}
+        {#if editingTaskId === task.id}
+          <div class="flex-grow flex gap-2">
+            <input
+              type="text"
+              bind:value={editingText}
+              class="flex-grow p-1 border rounded"
+              onkeydown={(e) => {
+                if (e.key === 'Enter') saveEdit(task);
+                if (e.key === 'Escape') cancelEdit();
+              }}
+            />
+            <button
+              onclick={() => saveEdit(task)}
+              class="text-sm text-green-600 hover:underline"
+            >
+              Save
+            </button>
+            <button
+              onclick={cancelEdit}
+              class="text-sm text-red-600 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        {:else}
+          <span class:line-through={task.completed} class="flex-grow">
+            {task.text}
+          </span>
           <button
-            onclick={() => onTaskMove(task.id, 'today')}
-            class="text-sm text-blue-600 hover:underline"
+            onclick={() => startEditing(task)}
+            class="text-sm text-gray-600 hover:underline"
           >
-            Move to Today
+            Edit
           </button>
-        {/if}
-        {#if relativeDay === 'today'}
-          <button
-            onclick={() => onTaskMove(task.id, 'tomorrow')}
-            class="text-sm text-blue-600 hover:underline"
-          >
-            Delay
-          </button>
+          {#if relativeDay === 'yesterday' || relativeDay.endsWith('days ago')}
+            <button
+              onclick={() => onTaskMove(task.id, 'today')}
+              class="text-sm text-blue-600 hover:underline"
+            >
+              Move to Today
+            </button>
+          {/if}
+          {#if relativeDay === 'today'}
+            <button
+              onclick={() => onTaskMove(task.id, 'tomorrow')}
+              class="text-sm text-blue-600 hover:underline"
+            >
+              Delay
+            </button>
+          {/if}
         {/if}
       </li>
     {/each}
