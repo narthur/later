@@ -203,24 +203,24 @@
           <span class:line-through={task.completed} class="flex-grow">
             {task.text}
           </span>
-          <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div class="flex gap-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
             <button
               onclick={() => startEditing(task)}
-              class="text-gray-600 hover:text-gray-800"
+              class="text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded"
               title="Edit"
             >
               <Icon icon="mdi:pencil" width="20" />
             </button>
             <button
               onclick={() => startMoving(task)}
-              class="text-blue-600 hover:text-blue-800"
+              class="text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded"
               title="Move to date..."
             >
               <Icon icon="mdi:calendar-clock" width="20" />
             </button>
             <button
               onclick={() => deleteTask(task)}
-              class="text-red-600 hover:text-red-800"
+              class="text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded"
               title="Delete"
             >
               <Icon icon="mdi:delete" width="20" />
@@ -228,7 +228,7 @@
             {#if relativeDay === 'yesterday' || relativeDay.endsWith('days ago')}
               <button
                 onclick={() => onTaskMove(task.id, 'today')}
-                class="text-blue-600 hover:text-blue-800"
+                class="text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded"
                 title="Move to Today"
               >
                 <Icon icon="mdi:arrow-right" width="20" />
@@ -237,7 +237,7 @@
             {#if relativeDay === 'today'}
               <button
                 onclick={() => onTaskMove(task.id, 'tomorrow')}
-                class="text-blue-600 hover:text-blue-800"
+                class="text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded"
                 title="Delay"
               >
                 <Icon icon="mdi:clock" width="20" />
