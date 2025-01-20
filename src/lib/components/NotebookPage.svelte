@@ -69,7 +69,6 @@
     today.setHours(0, 0, 0, 0);
     
     const pageDate = new Date(dateStr + 'T00:00:00');
-    pageDate.setHours(0, 0, 0, 0);
     
     const diffDays = Math.round((pageDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     console.log('NotebookPage: Calculating relative day for date:', dateStr, 'diff:', diffDays, {
@@ -84,7 +83,7 @@
     return `in ${diffDays} days`;
   }
 
-  const formattedDate = $derived(new Date(date).toLocaleDateString('en-US', {
+  const formattedDate = $derived(new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric'
