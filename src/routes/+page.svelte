@@ -97,6 +97,11 @@
 
 <div class="min-h-screen bg-amber-100 p-8">
 	<div class="mx-auto max-w-4xl">
+		<header class="mb-8 text-center">
+			<h1 class="mb-2 font-serif text-4xl font-bold text-amber-900">Later</h1>
+			<p class="text-sm text-amber-800">A simple task manager for today and tomorrow</p>
+		</header>
+
 		<div class="mb-4 flex justify-center">
 			<button
 				onclick={jumpToToday}
