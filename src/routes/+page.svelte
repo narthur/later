@@ -226,5 +226,14 @@
 				<div>New Task</div>
 			</div>
 		</div>
+
+		<footer class="mt-16 text-center text-sm text-amber-800">
+			<p class="space-x-4">
+				<a href="https://nathanarthur.com" class="hover:text-amber-950 underline">Nathan Arthur</a>
+				<a href="https://ko-fi.com/narthur" class="hover:text-amber-950 underline">Support on Ko-fi</a>
+				<a href="https://pinepeakdigital.com" class="hover:text-amber-950 underline">Pine Peak Digital</a>
+				<a href="https://taskratchet.com" class="hover:text-amber-950 underline">TaskRatchet</a>
+			</p>
+		</footer>
 	</div>
 </div>
