@@ -73,88 +73,96 @@
 	});
 </script>
 
-<svelte:window 
-  onkeydown={(e) => {
-    // Don't trigger when user is typing in an input
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-    
-    if (e.key === 'ArrowLeft') turnPage('backward');
-    else if (e.key === 'ArrowRight') turnPage('forward');
-    else if (e.key === 't') jumpToToday();
-    else if (e.key === 'n') {
-      e.preventDefault(); // Prevent 'n' from being typed into the input
-      // Find all new task inputs and focus the first visible one
-      const inputs = document.querySelectorAll<HTMLInputElement>('.new-task-input');
-      inputs.forEach(input => {
-        // Check if the input is visible by checking if any parent has display: none
-        if (input.offsetParent !== null) {
-          input.focus();
-        }
-      });
-    }
-  }}
+<svelte:window
+	onkeydown={(e) => {
+		// Don't trigger when user is typing in an input
+		if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+		if (e.key === 'ArrowLeft') turnPage('backward');
+		else if (e.key === 'ArrowRight') turnPage('forward');
+		else if (e.key === 't') jumpToToday();
+		else if (e.key === 'n') {
+			e.preventDefault(); // Prevent 'n' from being typed into the input
+			// Find all new task inputs and focus the first visible one
+			const inputs = document.querySelectorAll<HTMLInputElement>('.new-task-input');
+			inputs.forEach((input) => {
+				// Check if the input is visible by checking if any parent has display: none
+				if (input.offsetParent !== null) {
+					input.focus();
+				}
+			});
+		}
+	}}
 />
 
 <div class="min-h-screen bg-amber-100 p-8">
 	<div class="mx-auto max-w-4xl">
-		<div class="mb-4 flex justify-between">
-			<div class="flex gap-2">
-				<button
-					onclick={() => turnPage('backward')}
-					class="rounded bg-amber-200 px-4 py-2 transition-colors hover:bg-amber-300"
-				>
-					← Previous Spread
-				</button>
-				<button
-					onclick={jumpToToday}
-					class="rounded bg-amber-300 px-4 py-2 font-medium transition-colors hover:bg-amber-400"
-				>
-					Today
-				</button>
-			</div>
+		<div class="mb-4 flex justify-center">
 			<button
-				onclick={() => turnPage('forward')}
-				class="rounded bg-amber-200 px-4 py-2 transition-colors hover:bg-amber-300"
+				onclick={jumpToToday}
+				class="rounded bg-amber-300 px-4 py-2 font-medium transition-colors hover:bg-amber-400"
 			>
-				Next Spread →
+				Today
 			</button>
 		</div>
 
-		<div class="overflow-hidden rounded-lg bg-white shadow-lg">
-			<div class="flex border-b">
-				<div class="w-1/2 border-r">
-					{#key currentSpread.leftDate}
-						<NotebookPage
-							tasks={spreadTasks.leftTasks}
-							date={currentSpread.leftDate}
-							onTaskUpdate={handleTaskUpdate}
-							onTaskMove={handleTaskMove}
-							canAdd={true}
-						/>
-					{/key}
-				</div>
-				<div class="w-1/2">
-					{#key currentSpread.rightDate}
-						<NotebookPage
-							tasks={spreadTasks.rightTasks}
-							date={currentSpread.rightDate}
-							onTaskUpdate={handleTaskUpdate}
-							onTaskMove={handleTaskMove}
-							canAdd={true}
-						/>
-					{/key}
+		<div class="relative">
+			<button
+				onclick={() => turnPage('backward')}
+				class="absolute -left-16 top-24 rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
+				title="Previous Spread"
+			>
+				←
+			</button>
+
+			<div class="flex min-h-[32rem] w-full overflow-hidden rounded-lg bg-white shadow-lg">
+				<div class="flex w-full border-b">
+					<div class="w-1/2 border-r">
+						{#key currentSpread.leftDate}
+							<NotebookPage
+								tasks={spreadTasks.leftTasks}
+								date={currentSpread.leftDate}
+								onTaskUpdate={handleTaskUpdate}
+								onTaskMove={handleTaskMove}
+								canAdd={true}
+							/>
+						{/key}
+					</div>
+					<div class="w-1/2">
+						{#key currentSpread.rightDate}
+							<NotebookPage
+								tasks={spreadTasks.rightTasks}
+								date={currentSpread.rightDate}
+								onTaskUpdate={handleTaskUpdate}
+								onTaskMove={handleTaskMove}
+								canAdd={true}
+							/>
+						{/key}
+					</div>
 				</div>
 			</div>
+
+			<button
+				onclick={() => turnPage('forward')}
+				class="absolute -right-16 top-24 rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
+				title="Next Spread"
+			>
+				→
+			</button>
 		</div>
 
-    <div class="mt-8 mx-auto max-w-lg text-center text-sm text-gray-600">
-      <h3 class="font-medium mb-2">Keyboard Shortcuts</h3>
-      <div class="grid grid-cols-2 gap-2">
-        <div>← Left Arrow</div><div>Previous Spread</div>
-        <div>→ Right Arrow</div><div>Next Spread</div>
-        <div>T</div><div>Jump to Today</div>
-        <div>N</div><div>New Task</div>
-      </div>
-    </div>
+		<div class="mx-auto mt-8 max-w-lg text-center text-sm text-gray-600">
+			<h3 class="mb-2 font-medium">Keyboard Shortcuts</h3>
+			<div class="grid grid-cols-2 gap-2">
+				<div>← Left Arrow</div>
+				<div>Previous Spread</div>
+				<div>→ Right Arrow</div>
+				<div>Next Spread</div>
+				<div>T</div>
+				<div>Jump to Today</div>
+				<div>N</div>
+				<div>New Task</div>
+			</div>
+		</div>
 	</div>
 </div>
