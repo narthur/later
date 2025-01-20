@@ -255,7 +255,7 @@
         type="text"
         bind:value={newTaskText}
         placeholder="Add new task..."
-        class="flex-grow p-2 border rounded"
+        class="flex-grow p-2 border rounded new-task-input"
         onkeydown={(e) => e.key === 'Enter' && handleNewTask()}
       />
       <button

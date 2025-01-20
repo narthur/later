@@ -81,6 +81,17 @@
     if (e.key === 'ArrowLeft') turnPage('backward');
     else if (e.key === 'ArrowRight') turnPage('forward');
     else if (e.key === 't') jumpToToday();
+    else if (e.key === 'n') {
+      e.preventDefault(); // Prevent 'n' from being typed into the input
+      // Find all new task inputs and focus the first visible one
+      const inputs = document.querySelectorAll<HTMLInputElement>('.new-task-input');
+      inputs.forEach(input => {
+        // Check if the input is visible by checking if any parent has display: none
+        if (input.offsetParent !== null) {
+          input.focus();
+        }
+      });
+    }
   }}
 />
 
@@ -142,6 +153,7 @@
         <div>← Left Arrow</div><div>Previous Spread</div>
         <div>→ Right Arrow</div><div>Next Spread</div>
         <div>T</div><div>Jump to Today</div>
+        <div>N</div><div>New Task</div>
       </div>
     </div>
 	</div>
