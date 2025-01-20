@@ -1,4 +1,6 @@
-# sv
+# Later
+
+A task management app inspired by [Do It (Tomorrow)](https://www.tomorrow.do/), built with Svelte.
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
