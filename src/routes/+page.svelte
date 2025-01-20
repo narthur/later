@@ -99,7 +99,64 @@
 	<div class="mx-auto max-w-4xl">
 		<header class="mb-8 text-center">
 			<h1 class="mb-2 font-serif text-4xl font-bold text-amber-900">Later</h1>
-			<p class="text-sm text-amber-800">A simple task manager for today and tomorrow</p>
+			<p class="mb-4 text-sm text-amber-800">A simple task manager for today and tomorrow</p>
+			<div class="flex justify-center gap-4 text-sm">
+				<button
+					onclick={() => {
+						const data = JSON.stringify(tasks, null, 2);
+						const blob = new Blob([data], { type: 'application/json' });
+						const url = URL.createObjectURL(blob);
+						const a = document.createElement('a');
+						a.href = url;
+						a.download = `later-tasks-${DateService.getToday()}.json`;
+						document.body.appendChild(a);
+						a.click();
+						document.body.removeChild(a);
+						URL.revokeObjectURL(url);
+					}}
+					class="text-amber-800 hover:text-amber-950 underline"
+				>
+					Export Tasks
+				</button>
+				<label class="cursor-pointer text-amber-800 hover:text-amber-950 underline">
+					Import Tasks
+					<input
+						type="file"
+						accept=".json"
+						class="hidden"
+						onchange={(e) => {
+							const target = e.target as HTMLInputElement;
+							const file = target.files?.[0];
+							if (!file) return;
+
+							const reader = new FileReader();
+							reader.onload = (event) => {
+								try {
+									const importedTasks = JSON.parse(event.target?.result as string);
+									if (Array.isArray(importedTasks) && importedTasks.every(task => 
+										typeof task === 'object' && 
+										typeof task.id === 'string' &&
+										typeof task.text === 'string' &&
+										typeof task.date === 'string' &&
+										typeof task.completed === 'boolean' &&
+										typeof task.createdAt === 'number'
+									)) {
+										tasks = importedTasks;
+										saveTasks(tasks);
+										alert('Tasks imported successfully!');
+									} else {
+										alert('Invalid task format in the imported file');
+									}
+								} catch (err) {
+									const error = err as Error;
+									alert('Error importing tasks: ' + error.message);
+								}
+							};
+							reader.readAsText(file);
+						}}
+					/>
+				</label>
+			</div>
 		</header>
 
 		<div class="mb-4 flex justify-center">
