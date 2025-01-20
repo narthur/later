@@ -233,6 +233,7 @@
 				<a href="https://ko-fi.com/narthur" class="hover:text-amber-950 underline">Support on Ko-fi</a>
 				<a href="https://pinepeakdigital.com" class="hover:text-amber-950 underline">Pine Peak Digital</a>
 				<a href="https://taskratchet.com" class="hover:text-amber-950 underline">TaskRatchet</a>
+				<a href="https://codebuff.com/referrals/ref-6d348d54-80f1-4155-903b-2cc6c57dd12f" class="hover:text-amber-950 underline">Built with Codebuff</a>
 			</p>
 		</footer>
 	</div>

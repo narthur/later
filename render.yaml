@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: later
+    runtime: static
+    buildCommand: pnpm run build
+    staticPublishPath: ./build
+    pullRequestPreviewsEnabled: true
+    domains:
+      - later.nathanarthur.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
