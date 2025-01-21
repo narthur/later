@@ -13,3 +13,4 @@ A task management app inspired by [Do It (Tomorrow)](https://www.tomorrow.do/). 
 - Simple and focused interface
 - Keyboard-first navigation
 - Natural date handling
+- Touch-friendly with intuitive gestures (swipe right for previous, left for next)

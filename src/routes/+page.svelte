@@ -159,27 +159,77 @@
 			</div>
 		</header>
 
-		<div class="mb-4 flex justify-center">
+		<div class="mb-4 flex justify-center items-center gap-4">
+			<button
+				onclick={() => turnPage('backward')}
+				class="md:hidden rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
+				title="Previous Spread"
+			>
+				←
+			</button>
 			<button
 				onclick={jumpToToday}
 				class="rounded bg-amber-300 px-4 py-2 font-medium transition-colors hover:bg-amber-400"
 			>
 				Today
 			</button>
+			<button
+				onclick={() => turnPage('forward')}
+				class="md:hidden rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
+				title="Next Spread"
+			>
+				→
+			</button>
 		</div>
 
 		<div class="relative">
 			<button
 				onclick={() => turnPage('backward')}
-				class="absolute -left-16 top-24 rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
+				class="hidden md:block absolute -left-16 top-24 rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
 				title="Previous Spread"
 			>
 				←
 			</button>
 
-			<div class="flex min-h-[32rem] w-full overflow-hidden rounded-lg bg-white shadow-lg">
+			<div 
+				class="flex min-h-[32rem] w-full overflow-hidden rounded-lg bg-white shadow-lg"
+				ontouchstart={(e) => {
+					const touch = e.touches[0];
+					let startX = touch.clientX;
+					let startY = touch.clientY;
+
+					const handleTouchMove = (e: TouchEvent) => {
+						// Prevent scrolling while swiping
+						e.preventDefault();
+					};
+
+					const handleTouchEnd = (e: TouchEvent) => {
+						const touch = e.changedTouches[0];
+						const deltaX = touch.clientX - startX;
+						const deltaY = touch.clientY - startY;
+
+						// Only trigger if horizontal swipe is more significant than vertical
+						if (Math.abs(deltaX) > Math.abs(deltaY)) {
+							// Require at least 50px of swipe distance
+							if (Math.abs(deltaX) > 50) {
+								if (deltaX > 0) {
+									turnPage('backward');
+								} else {
+									turnPage('forward');
+								}
+							}
+						}
+
+						document.removeEventListener('touchmove', handleTouchMove);
+						document.removeEventListener('touchend', handleTouchEnd);
+					};
+
+					document.addEventListener('touchmove', handleTouchMove, { passive: false });
+					document.addEventListener('touchend', handleTouchEnd, { once: true });
+				}}
+			>
 				<div class="flex w-full border-b">
-					<div class="w-1/2 border-r">
+					<div class="hidden md:block md:w-1/2 border-r">
 						{#key currentSpread.leftDate}
 							<NotebookPage
 								tasks={spreadTasks.leftTasks}
@@ -190,7 +240,7 @@
 							/>
 						{/key}
 					</div>
-					<div class="w-1/2">
+					<div class="w-full md:w-1/2">
 						{#key currentSpread.rightDate}
 							<NotebookPage
 								tasks={spreadTasks.rightTasks}
@@ -206,7 +256,7 @@
 
 			<button
 				onclick={() => turnPage('forward')}
-				class="absolute -right-16 top-24 rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
+				class="hidden md:block absolute -right-16 top-24 rounded bg-amber-200 px-3 py-2 transition-colors hover:bg-amber-300"
 				title="Next Spread"
 			>
 				→
