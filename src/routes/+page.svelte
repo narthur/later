@@ -192,15 +192,89 @@
 			</button>
 
 			<div 
-				class="flex min-h-[32rem] w-full overflow-hidden rounded-lg bg-white shadow-lg"
+				class="relative flex min-h-[32rem] w-full overflow-hidden rounded-lg bg-white shadow-lg"
 				ontouchstart={(e) => {
+					const container = e.currentTarget as HTMLElement;
+					const content = container.querySelector('.flex.w-full.border-b') as HTMLElement;
 					const touch = e.touches[0];
 					let startX = touch.clientX;
 					let startY = touch.clientY;
+					let currentTranslateX = 0;
+					let nextSpread: Spread | null = null;
+					let nextContent: HTMLElement | null = null;
+
+					// Create and position the next page container
+					const createNextPage = (direction: 'forward' | 'backward') => {
+						const next = direction === 'forward' 
+							? SpreadService.getNextSpread(currentSpread)
+							: SpreadService.getPreviousSpread(currentSpread);
+						const nextTasks = SpreadService.getTasksForSpread(next, tasks);
+						
+						const div = document.createElement('div');
+						div.className = 'absolute top-0 flex w-full border-b bg-white';
+						div.style.transition = 'transform 0.2s ease-out';
+						div.style.transform = `translateX(${direction === 'forward' ? '100%' : '-100%'})`;
+						
+						// Create preview content using the tasks we already fetched
+						const taskList = nextTasks.rightTasks.map(task => `
+							<li class="flex items-center gap-2 group">
+								<input type="checkbox" ${task.completed ? 'checked' : ''} class="rounded border-gray-400" />
+								<span class="${task.completed ? 'line-through' : ''} flex-grow">${task.text}</span>
+							</li>
+						`).join('');
+
+						div.innerHTML = `
+							<div class="w-full">
+								<div class="flex flex-col h-full p-4 bg-amber-50">
+									<div class="mb-4">
+										<h2 class="text-xl font-serif capitalize">${DateService.getRelativeDayDescription(next.rightDate)}</h2>
+										<p class="text-sm text-gray-600">${new Date(next.rightDate + 'T00:00:00').toLocaleDateString('en-US', {
+											weekday: 'long',
+											month: 'long',
+											day: 'numeric'
+										})}</p>
+									</div>
+									<ul class="space-y-2 flex-grow">
+										${taskList}
+									</ul>
+								</div>
+							</div>
+						`;
+						
+						container.appendChild(div);
+						return { spread: next, element: div };
+					};
+
+					// Add transition for smooth reset if swipe doesn't complete
+					content.style.transition = 'transform 0.2s ease-out';
 
 					const handleTouchMove = (e: TouchEvent) => {
 						// Prevent scrolling while swiping
 						e.preventDefault();
+						
+						const touch = e.touches[0];
+						const deltaX = touch.clientX - startX;
+						const deltaY = touch.clientY - startY;
+
+						// Only move horizontally if the swipe is more horizontal than vertical
+						if (Math.abs(deltaX) > Math.abs(deltaY)) {
+							// Create next page if we haven't yet
+							if (!nextContent && Math.abs(deltaX) > 20) {
+								const direction = deltaX > 0 ? 'backward' : 'forward';
+								const next = createNextPage(direction);
+								nextSpread = next.spread;
+								nextContent = next.element;
+							}
+
+							// Move both current and next pages
+							if (nextContent) {
+								const progress = Math.abs(deltaX) / window.innerWidth;
+								content.style.transform = `translateX(${deltaX}px)`;
+								nextContent.style.transform = `translateX(${deltaX > 0 ? 
+									(-100 + progress * 100) + '%' : 
+									(100 - progress * 100) + '%'})`;
+							}
+						}
 					};
 
 					const handleTouchEnd = (e: TouchEvent) => {
@@ -208,14 +282,52 @@
 						const deltaX = touch.clientX - startX;
 						const deltaY = touch.clientY - startY;
 
+						// Reset transition duration for the snap back or page turn
+						content.style.transition = 'transform 0.2s ease-out';
+						if (nextContent) {
+							nextContent.style.transition = 'transform 0.2s ease-out';
+						}
+
 						// Only trigger if horizontal swipe is more significant than vertical
 						if (Math.abs(deltaX) > Math.abs(deltaY)) {
 							// Require at least 50px of swipe distance
-							if (Math.abs(deltaX) > 50) {
+							if (Math.abs(deltaX) > 50 && nextSpread) {
+								// Animate both pages
+								content.style.transform = `translateX(${deltaX > 0 ? '100%' : '-100%'})`;
+								if (nextContent) {
+									nextContent.style.transform = 'translateX(0)';
+								}
+								
+								// Animate both pages
+								content.style.transform = `translateX(${deltaX > 0 ? '100%' : '-100%'})`;
+								if (nextContent) {
+									nextContent.style.transform = 'translateX(0)';
+								}
+								
+								// Change page immediately but keep animations
 								if (deltaX > 0) {
 									turnPage('backward');
 								} else {
 									turnPage('forward');
+								}
+								
+								// Clean up after animation completes
+								setTimeout(() => {
+									if (nextContent) {
+										nextContent.remove();
+									}
+									content.style.transform = '';
+									content.style.transition = '';
+								}, 200);
+							} else {
+								// Snap back if swipe wasn't far enough
+								content.style.transform = '';
+								if (nextContent) {
+									nextContent.style.transform = `translateX(${deltaX > 0 ? '-100%' : '100%'})`;
+									// Remove next page after transition
+									setTimeout(() => {
+										nextContent?.remove();
+									}, 200);
 								}
 							}
 						}
