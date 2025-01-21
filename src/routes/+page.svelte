@@ -211,7 +211,7 @@
 						const nextTasks = SpreadService.getTasksForSpread(next, tasks);
 						
 						const div = document.createElement('div');
-						div.className = 'absolute top-0 flex w-full border-b bg-white';
+						div.className = 'absolute top-0 flex w-full h-full border-b bg-white';
 						div.style.transition = 'transform 0.2s ease-out';
 						div.style.transform = `translateX(${direction === 'forward' ? '100%' : '-100%'})`;
 						
